@@ -1,4 +1,5 @@
-# Project 2: Scene Classification with Transfer Learning
+# Project 2
+## Week 05-Scene Classification with Transfer Learning
 ---
 
 
@@ -75,3 +76,93 @@ Building directly upon the transfer learning methodology mastered in Week 5, the
 * **Data Source:** A structured, labeled image dataset sourced from Kaggle containing multiple defect classes with balanced splits. Dataset license validation, direct links, specific class labels, and total sample quantities will be documented prior to pipeline execution.
 * **Methodology:** Implement a comparative framework analyzing frozen feature extraction against targeted fine-tuning. Performance will be rigorously benchmarked using overall accuracy, precision, recall, F1-scores, and normalized confusion matrices.
 * **Application Value:** Establishes a reliable framework for computer-vision-based quality control, minimizing manual oversight in industrial manufacturing lines.
+
+---
+
+
+# Week 6 — Cotton Disease Detection with ResNet18
+
+## Overview
+Week 6 file contains the implementation and evaluation of a deep learning pipeline designed to classify cotton crop health from leaf and plant images using a pre-trained **ResNet18** vision backbone. Accurate and automated detection of cotton plant diseases enables timely intervention, preventing catastrophic yield losses for farmers while minimizing unnecessary pesticide usage.
+
+---
+
+## Technical Summary Dashboard
+
+| Metric / Item | Detail |
+| :--- | :--- |
+| **Who Benefits** | Cotton farmers and agricultural extension workers in field and remote settings. |
+| **Why It Matters** | Early disease diagnosis prevents severe yield loss, financial distress, and targeted chemical application. |
+| **Dataset** | **Cotton Disease Dataset** (`janmejaybhoi` on Kaggle), Open Dataset; 1,951 images across 4 classes. |
+| **Data Audit** | Imbalance ratio: **2.8** (815/288); Exact duplicates: **34**; Near-duplicates (train/test): **4**; Grouping: 1.00 img/group (`GROUP_PATTERN = None`). |
+| **Imbalance Handling** | Handled via Stratified Group Split / Stratified Sampling and Weighted Cross-Entropy Loss (weights: 1.693, 0.599, 1.143, 1.157). |
+| **Phase 1 Validation F1** | **0.870** (Head only @ Epoch 2) |
+| **Phase 2 Validation F1** | **0.982** (Fine-tune `layer4` @ Epoch 3) |
+| **Test Set Macro-F1** | **0.102** (Model collapse detected on test set; weak classes F1 = 0.000) |
+| **Grad-CAM Verdict** | **No shortcut found**; attention localized on leaf lesions, spots, and structural veins. |
+| **Limitations** | Unseen field conditions, extreme weather, camera variations. Human expert oversight required. |
+
+---
+
+## Dataset Details & Class Breakdown
+
+The dataset contains **1,951 images** categorized into 4 distinct classes:
+
+| Class Label | Image Count | Proportion (%) | Class Weight |
+| :--- | :--- | :--- | :--- |
+| **diseased cotton leaf** | 288 | 14.76% | 1.693 |
+| **diseased cotton plant** | 815 | 41.77% | 0.599 |
+| **fresh cotton leaf** | 427 | 21.89% | 1.143 |
+| **fresh cotton plant** | 421 | 21.58% | 1.157 |
+| **Total** | **1,951** | **100.0%** | — |
+
+* **Imbalance Ratio**: 815/288 = 2.8
+* **Images Per Group Ratio**: 1.00 (Filenames do not contain structured plant IDs).
+
+---
+
+## Class Weight Arithmetic
+
+Class weights are computed using the balanced weight formula:
+Weight_c = N/K * n_c
+
+Where:
+* N = 1463 (total training samples)
+* K = 4 (number of classes)
+* n_c = training sample count for class c
+
+**Example calculation for `diseased cotton leaf`:**
+
+Weight = 1463/4 * 216 = 1.693
+
+---
+
+## Pipeline Architecture & Configuration
+### Key Pipeline Constants
+| Constant | Value | Description |
+| :--- | :--- | :--- |
+| **DATA_ROOT** | `'/kaggle/input/datasets/janmejaybhoi/cotton-disease-dataset/Cotton Disease'` | Dataset root directory |
+| **TEST_DIR** | `None` | Carved from TRAIN_DIR via Stratified Group Split |
+| **GRAYSCALE** | `False` | RGB color photos |
+| **IMG_SIZE** | `224` | Input resolution (224x224) |
+| **BACKBONE** | `'resnet18'` | Pre-trained ResNet-18 |
+| **POSITIVE** | `None` | Multi-class setup (4 classes)|
+| **TARGET_RECALL** | `0.95` | Thresholding target|
+
+
+* **Preprocessing & Transforms**: Images are resized to $224 \times 224$ pixels and normalized according to ImageNet standards[cite: 1].
+* **Backbone**: Transfer learning with PyTorch `models.resnet18(pretrained=True)` with a custom fully connected head adjusted for 4 output classes[cite: 1].
+* **Training & Optimization**: Cross-Entropy loss with Stratified Group K-Fold / Train-Test splitting to preserve target class ratios[cite: 1].
+
+---
+
+## Experimental Workflow
+
+### 1. Dataset Indexing & Audit
+* Built a custom file indexer scanning subdirectories for valid image extensions (`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tif`)[cite: 1].
+* Performed integrity checks for missing/corrupted files and image dimensions[cite: 1].
+
+### 2. Model Training & Evaluation
+* Trained ResNet18 using PyTorch on CUDA acceleration[cite: 1].
+* Monitored loss and Macro-F1 across validation splits[cite: 1].
+* Computed Confusion Matrix and Per-Class Precision/Recall metrics[cite: 1].
