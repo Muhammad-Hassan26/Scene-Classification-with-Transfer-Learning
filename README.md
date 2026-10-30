@@ -11,7 +11,7 @@ This project investigates deep learning applications through convolutional neura
 
 ## 📊 Dataset: Intel Image Classification
 * **Source:** Kaggle (`puneet6060/intel-image-classification`)
-* **Task:** Multi-class natural scene image classification across 6 distinct categories (`buildings`, `forest`, `glacier`, `mountain`, `sea`, `street`)[cite: 1].
+* **Task:** Multi-class natural scene image classification across 6 distinct categories (`buildings`, `forest`, `glacier`, `mountain`, `sea`, `street`).
   
 * **Dataset Scale & Class Distribution:**
   * **Buildings:** 2,191 train images / 437 test images
@@ -150,19 +150,19 @@ Weight = 1463/4 * 216 = 1.693
 | **TARGET_RECALL** | `0.95` | Thresholding target|
 
 
-* **Preprocessing & Transforms**: Images are resized to $224 \times 224$ pixels and normalized according to ImageNet standards[cite: 1].
-* **Backbone**: Transfer learning with PyTorch `models.resnet18(pretrained=True)` with a custom fully connected head adjusted for 4 output classes[cite: 1].
-* **Training & Optimization**: Cross-Entropy loss with Stratified Group K-Fold / Train-Test splitting to preserve target class ratios[cite: 1].
+* **Preprocessing & Transforms**: Images are resized to $224 \times 224$ pixels and normalized according to ImageNet standards.
+* **Backbone**: Transfer learning with PyTorch `models.resnet18(pretrained=True)` with a custom fully connected head adjusted for 4 output classes.
+* **Training & Optimization**: Cross-Entropy loss with Stratified Group K-Fold / Train-Test splitting to preserve target class ratios.
 
 ---
 
 ## Experimental Workflow
 
 ### 1. Dataset Indexing & Audit
-* Built a custom file indexer scanning subdirectories for valid image extensions (`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tif`)[cite: 1].
-* Performed integrity checks for missing/corrupted files and image dimensions[cite: 1].
+* Built a custom file indexer scanning subdirectories for valid image extensions (`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tif`).
+* Performed integrity checks for missing/corrupted files and image dimensions.
 
 ### 2. Model Training & Evaluation
-* Trained ResNet18 using PyTorch on CUDA acceleration[cite: 1].
-* Monitored loss and Macro-F1 across validation splits[cite: 1].
-* Computed Confusion Matrix and Per-Class Precision/Recall metrics[cite: 1].
+* Trained ResNet18 using PyTorch on CUDA acceleration.
+* Monitored loss and Macro-F1 across validation splits.
+* Computed Confusion Matrix and Per-Class Precision/Recall metrics.
