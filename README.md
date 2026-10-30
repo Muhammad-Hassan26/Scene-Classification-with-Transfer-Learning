@@ -169,9 +169,10 @@ Weight = 1463/4 * 216 = 1.693
 
 ---
 
+
 # Week 7: Text and Multimodal AI - Project Repository
 
-This repository houses the code, experimental setups, and analytical evaluations for **Week 7: Text and Multimodal AI**. The project covers manual TF-IDF implementation and vector similarity, robust text classification for spam detection, domain-adapted Named Entity Recognition (NER) for agriculture, regular expression extraction with negative assertions, OCR error correction, and multimodal case record building with automated PII masking.
+The project covers manual TF-IDF implementation and vector similarity, robust text classification for spam detection, domain-adapted Named Entity Recognition (NER) for agriculture, regular expression extraction with negative assertions, OCR error correction, and multimodal case record building with automated PII masking.
 
 ---
 
