@@ -166,3 +166,118 @@ Weight = 1463/4 * 216 = 1.693
 * Trained ResNet18 using PyTorch on CUDA acceleration.
 * Monitored loss and Macro-F1 across validation splits.
 * Computed Confusion Matrix and Per-Class Precision/Recall metrics.
+
+---
+
+# Week 7: Text and Multimodal AI - Project Repository
+
+This repository houses the code, experimental setups, and analytical evaluations for **Week 7: Text and Multimodal AI**. The project covers manual TF-IDF implementation and vector similarity, robust text classification for spam detection, domain-adapted Named Entity Recognition (NER) for agriculture, regular expression extraction with negative assertions, OCR error correction, and multimodal case record building with automated PII masking.
+
+---
+
+## TF-IDF by Hand
+
+Manual calculation of TF-IDF representations and cosine similarities, verified against `scikit-learn`'s `TfidfVectorizer` over a 3-document corpus:
+* $d_1$: `"win free cash now"`
+* $d_2$: `"call me now"`
+* $d_3$: `"free call now"`
+
+### Key Analytical Findings
+* **Smoothed IDF Formula:** Utilizes $\text{tfidf} = \ln\left(\frac{1 + N}{1 + df}\right) + 1$ (where $N = 3$).
+  * For `"free"` ($df = 2$): $\ln(4 / 3) + 1 \approx \mathbf{1.288}$
+  * For `"now"` ($df = 3$): $\ln(4 / 4) + 1 = \mathbf{1.000}$
+* **Discriminative Weighting:** The term `"now"` receives the baseline score of $1.000$ because it appears across all documents ($df = 3$), nullifying its inverse document frequency component ($\ln(1) = 0$) and rendering it entirely non-discriminative.
+* **Cosine Similarity:** The similarity score between $d_2$ and $d_3$ computes to **$0.54$**, perfectly matching `scikit-learn` outputs.
+
+---
+
+## Text Classification (SMS Spam Collection)
+
+Trained and evaluated on the **SMS Spam Collection Dataset** containing `5,572` total messages (`4,825` ham, `747` spam; spam proportion: `13.4%`, baseline "always ham" accuracy: `86.6%`).
+
+### Model Performance Summary
+* **Word 1-2 Grams Classifier:** Macro-F1: **`0.974`** | Feature Space: `12,128` | Spam Precision: `0.979` | Spam Recall: `0.933`
+* **Character 2-5 Grams Classifier (`char_wb`):** Macro-F1: **`0.982`** | Feature Space: `36,449`
+* **Obfuscation Robustness:** Tested against adversarial strings such as `"W1N a FR33 pr1ze!! txt CLAIM now"`, achieving a confident spam probability score of **`0.85`**.
+
+### Top Predictive Features
+* **Spam Indicators(Top Positive Features):** `['call', 'txt', 'free', 'text', 'reply', 'uk', 'to', 'www', 'mobile', 'claim', 'stop', 'your']`
+* **Ham Indicators(Top Negative Features):** `['my', 'me', 'ok', 'that', 'it', 'but', 'll', 'gt', 'lt', 'can', 'what', 'da']`
+
+---
+
+## Named Entity Recognition (NER), Measured
+
+Domain-adapted entity extraction evaluated on specialized sentences concerning **Agriculture (Cotton Disease)** using `spaCy` (`en_core_web_sm`) augmented with a custom `EntityRuler`.
+
+### Evaluation Results (Held-Out Test Set: 10 Sentences / 35 Total Gold Entities)
+* **spaCy Out-of-the-Box:** Precision: `0.778` | Recall: `0.700` | **F1: 0.737**
+* **spaCy + Custom Entity Ruler & Title Stripping:** Precision: `0.947` | Recall: `0.900` | **F1: 0.923** (representing an absolute **+0.186** F1 gain)
+
+---
+
+## Regex Fields with Negative Tests
+
+Designed rigorous regular expression patterns for agricultural domain extraction, backed by strict negative assertions to prevent false positives over unformatted text or non-target entities.
+
+| Pattern Name | Target Entity | Example Match | Test Status |
+| :--- | :--- | :--- | :--- |
+| `disease_pest` | Specific cotton diseases, pests, and treatments | `"cotton leaf curl virus"`, `"whitefly"` | ✅ Passed |
+| `location` | Key cotton-belt districts (e.g., Multan, Bahawalpur) | `"Multan"`, `"Vehari"` | ✅ Passed (Rejects non-target cities) |
+| `amount` | Monetary values with currency prefixes | `"Rs. 15,000"`, `"PKR 28,000"` | ✅ Passed (Rejects bare integers) |
+| `date` | Numeric and written calendar dates | `"14 August 2026"`, `"02/09/2026"` | ✅ Passed |
+| `metric` | Survey and impact metrics | `"35 fields"`, `"120 farmers"` | ✅ Passed |
+
+---
+
+## Character Error Rate (CER) and OCR Repair
+
+Evaluated optical character recognition pipelines and implemented deterministic context post-processing rules to correct frequent character substitutions (such as letter/digit confusions like $\text{O} \leftrightarrow 0$ and $\text{l/I} \leftrightarrow 1$).
+
+* **Synthetic Invoice OCR Extraction:** Achieved a clean Character Error Rate (CER) of **`0.000`** on high-contrast renders.
+* **Context Rules Post-Processor (`fix_ocr`):** Automatically standardizes damaged tokens (e.g., mapping `Invoice N0. 4417` $\rightarrow$ `Invoice No. 4417` and `12,5O0` $\rightarrow$ `12,500`), effectively mitigating real-world scan anomalies.
+
+---
+
+## Multimodal Case Record & Privacy Masking
+
+Integrated the **ResNet-18** image classification backbone from Week 6 (`['diseased cotton leaf', 'diseased cotton plant', 'fresh cotton leaf', 'fresh cotton plant']`) with text evidence extraction and stringent PII masking routines.
+
+### Privacy Compliance & Scrubbing
+Before logging or serializing records, sensitive personally identifiable information (PII) including CNICs, phone numbers, and email addresses undergoes automated masking:
+```python
+sample = "Farmer Imran Sheikh (CNIC: 35202-1234567-1) called 0300-1234567 via info@engro.com.pk"
+# Output -> "Farmer Imran Sheikh (CNIC: [CNIC]) called [PHONE] via [EMAIL]"
+```
+
+### Sample Output JSON Record
+```json
+{
+  "image_evidence": {
+    "diseased cotton leaf": 0.892,
+    "diseased cotton plant": 0.081,
+    "fresh cotton leaf": 0.021,
+    "fresh cotton plant": 0.006
+  },
+  "text_evidence": {
+    "entities": [
+      ["Imran Sheikh", "PERSON"],
+      ["Bahawalpur", "GPE"],
+      ["14 August 2026", "DATE"],
+      ["cotton leaf curl virus", "DISEASE"]
+    ],
+    "fields": {
+      "disease_pest": ["cotton leaf curl virus"],
+      "location": ["Bahawalpur"],
+      "date": ["14 August 2026"]
+    },
+    "urgent_terms": [
+      "outbreak",
+      "virus"
+    ]
+  }
+}
+---
+
+
+
