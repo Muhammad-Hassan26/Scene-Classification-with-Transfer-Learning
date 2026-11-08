@@ -71,7 +71,7 @@ Throughput: ~2.4 requests/sec
 
 ---
 
-## 🛠️ Architecture & Performance Q&A
+## 🛠️ Understanding Q&A
 
 ### 1. Handling Invalid File Types at `/predict`
 * **Expected Status Code:** `415 Unsupported Media Type` (or `400 Bad Request`).
