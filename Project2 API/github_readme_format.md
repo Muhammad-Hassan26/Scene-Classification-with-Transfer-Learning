@@ -51,11 +51,11 @@ Throughput: ~2.4 requests/sec
 
 * **Answer:** Assuming one request in flight at a time, throughput is approximately the reciprocal of the $p50$ latency:
 
-  $$
-  \text{Throughput} = \frac{1}{0.0578\text{ s}} \approx 17.3\text{ requests/sec}
-  $$
+  
+ Throughput = 1/0.0578s =approx 17.3 requests/sec
+  
 
-  Multiplying this by $86,400\text{ seconds}$ in a day yields a theoretical capacity of approximately **1,494,720 requests per day** under continuous saturation. *Note: Practical capacity must be verified through real-world load testing.*
+  Multiplying this by 86,400seconds in a day yields a theoretical capacity of approximately **1,494,720 requests per day** under continuous saturation. *Note: Practical capacity must be verified through real-world load testing.*
 
 ### 4. Edge Case Input Experiment
 
@@ -81,33 +81,33 @@ Throughput: ~2.4 requests/sec
 * **Resource Efficiency:** Loading the PyTorch model (`week6_model.pt`) inside FastAPI's `lifespan` context manager ensures the model weights are loaded into RAM once upon server startup.
 * **Performance:** If initialized inside the endpoint function, the model file would be re-read from disk on every incoming request, causing severe latency spikes and high disk I/O.
 
-### 3. Latency Metrics Analysis ($p50 = 40\text{ ms}$, $p95 = 400\text{ ms}$)
-* **Analysis:** While median performance ($p50$) is fast at $40\text{ ms}$, a high tail latency ($p95 = 400\text{ ms}$) indicates that $5\%$ of requests take at least $10\times$ longer. This suggests queuing, resource contention, or thread-blocking behavior under load.
+### 3. Latency Metrics Analysis (p50 = 40ms, p95 = 400ms)
+* **Analysis:** While median performance (p50) is fast at 40 ms, a high tail latency (p95 = 400ms) indicates that 5% of requests take at least 10*longer. This suggests queuing, resource contention, or thread-blocking behavior under load.
 * **Checkpoints:**
   1. Concurrency limits and threadpool queue length.
   2. CPU throttling, context switching, or memory swapping on host hardware.
   3. Image size variations causing preprocessing delay.
 
 ### 4. Worker Allocation Calculation
-Target load: 500,000 requests/day, peak factor of $5\times$, single-worker capacity of 25 requests/sec.
+Target load: 500,000 requests/day, peak factor of 5 times, single-worker capacity of 25 requests/sec.
 
 * **Average RPS:**
 
-  $$
-  \text{Average RPS} = \frac{500,000}{86,400} \approx 5.79\text{ req/sec}
-  $$
+  
+  Average RPS = 500,000/86,400 =approx 5.79 req/sec
+  
 
 * **Peak RPS:**
 
-  $$
-  \text{Peak RPS} = 5.79 \times 5 = 28.95\text{ req/sec}
-  $$
+  
+  Peak RPS = 5.79 * 5 = 28.95 req/sec
+  
 
 * **Required Workers:**
 
-  $$
-  \text{Required Workers} = \frac{28.95}{25} \approx 1.16
-  $$
+  
+  Required Workers = 28.95/25 =approx 1.16
+  
 
 * **Answer:** You need **2 workers** to handle peak traffic safely without dropping requests.
 
@@ -118,12 +118,12 @@ Target load: 500,000 requests/day, peak factor of $5\times$, single-worker capac
 ### 6. Team Communication Channels
 * **Formula:**
 
-  $$
-  \text{Channels} = \frac{N(N - 1)}{2}
-  $$
+  
+  Channels = N(N - 1)/2
+  
 
-* **Calculation ($N = 4$):**
+* **Calculation (N = 4):**
 
-  $$
-  \text{Channels} = \frac{4 \times (4 - 1)}{2} = \frac{12}{2} = \mathbf{6\text{ channels}}
-  $$
+  
+  Channels = 4 * (4 - 1)/2 = 12/2 = 6 channels
+  
